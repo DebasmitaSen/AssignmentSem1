@@ -1,0 +1,133 @@
+import java.util.Scanner;
+
+public class HouseHunting {
+
+    // Problem 1A: Basic House Hunting
+    public static int calculateMonthsBasic(double annualSalary, double portionSaved, double totalCost) {
+        double portionDownPayment = 0.25;
+        double r = 0.04; // annual investment return
+        double downPayment = totalCost * portionDownPayment;
+        double currentSavings = 0.0;
+        double monthlySalary = annualSalary / 12.0;
+        int months = 0;
+
+        while (currentSavings < downPayment) {
+            currentSavings += currentSavings * (r / 12.0);
+            currentSavings += monthlySalary * portionSaved;
+            months++;
+        }
+        return months;
+    }
+
+    // Problem 1B: House Hunting with Raises
+    public static int calculateMonthsWithRaises(double annualSalary, double portionSaved, double totalCost, double semiAnnualRaise) {
+        double portionDownPayment = 0.25;
+        double r = 0.04;
+        double downPayment = totalCost * portionDownPayment;
+        double currentSavings = 0.0;
+        double monthlySalary = annualSalary / 12.0;
+        int months = 0;
+
+        while (currentSavings < downPayment) {
+            currentSavings += currentSavings * (r / 12.0);
+            currentSavings += monthlySalary * portionSaved;
+            months++;
+            if (months % 6 == 0) {
+                monthlySalary += monthlySalary * semiAnnualRaise;
+            }
+        }
+        return months;
+    }
+
+    // Problem 1C: Optimal Savings Rate with Bisection Search
+    public static double findOptimalSavingsRate(double annualSalary, double totalCost) {
+        double portionDownPayment = 0.25;
+        double r = 0.04;
+        double semiAnnualRaise = 0.07;
+        double downPayment = totalCost * portionDownPayment;
+        int monthsTarget = 36;
+
+        int low = 0;
+        int high = 10000;
+        double epsilon = 100.0;
+        int steps = 0;
+
+        double savingsRate = 0.0;
+
+        while (low <= high) {
+            steps++;
+            int mid = (low + high) / 2;
+            savingsRate = mid / 10000.0;
+            double currentSavings = 0.0;
+            double monthlySalary = annualSalary / 12.0;
+
+            for (int month = 1; month <= monthsTarget; month++) {
+                currentSavings += currentSavings * (r / 12.0);
+                currentSavings += monthlySalary * savingsRate;
+                if (month % 6 == 0) {
+                    monthlySalary += monthlySalary * semiAnnualRaise;
+                }
+            }
+
+            if (Math.abs(currentSavings - downPayment) <= epsilon) {
+                System.out.println("Steps in bisection search: " + steps);
+                return savingsRate;
+            } else if (currentSavings < downPayment) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return -1; // not possible
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("Choose Problem: 1A, 1B, or 1C");
+        String choice = sc.nextLine();
+
+        if (choice.equalsIgnoreCase("1A")) {
+            System.out.print("Enter annual salary: ");
+            double salary = sc.nextDouble();
+            System.out.print("Enter portion saved (as decimal): ");
+            double portionSaved = sc.nextDouble();
+            System.out.print("Enter total house cost: ");
+            double totalCost = sc.nextDouble();
+
+            int months = calculateMonthsBasic(salary, portionSaved, totalCost);
+            System.out.println("Number of months: " + months);
+
+        } else if (choice.equalsIgnoreCase("1B")) {
+            System.out.print("Enter annual salary: ");
+            double salary = sc.nextDouble();
+            System.out.print("Enter portion saved (as decimal): ");
+            double portionSaved = sc.nextDouble();
+            System.out.print("Enter total house cost: ");
+            double totalCost = sc.nextDouble();
+            System.out.print("Enter semi-annual raise (as decimal): ");
+            double raise = sc.nextDouble();
+
+            int months = calculateMonthsWithRaises(salary, portionSaved, totalCost, raise);
+            System.out.println("Number of months: " + months);
+
+        } else if (choice.equalsIgnoreCase("1C")) {
+            System.out.print("Enter annual salary: ");
+            double salary = sc.nextDouble();
+            System.out.print("Enter total house cost: ");
+            double totalCost = sc.nextDouble();
+
+            double rate = findOptimalSavingsRate(salary, totalCost);
+            if (rate == -1) {
+                System.out.println("It is not possible to pay the down payment in 36 months.");
+            } else {
+                System.out.printf("Best savings rate: %.4f\n", rate);
+            }
+        } else {
+            System.out.println("Invalid choice.");
+        }
+
+        sc.close();
+    }
+}
